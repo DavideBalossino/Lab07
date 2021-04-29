@@ -5,7 +5,10 @@
 package it.polito.tdp.poweroutages;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
+
+import it.polito.tdp.poweroutages.model.Guasti;
 import it.polito.tdp.poweroutages.model.Model;
 import it.polito.tdp.poweroutages.model.Nerc;
 import javafx.event.ActionEvent;
@@ -39,6 +42,52 @@ public class FXMLController {
     @FXML
     void doRun(ActionEvent event) {
     	txtResult.clear();
+    	String x=txtYears.getText();
+    	Integer anni=0;
+    	try {
+    		anni=Integer.parseInt(x);
+    	} catch(NumberFormatException e) {
+    		txtResult.setText("Inserire come anni un numero");
+    		return;
+    	}
+    	String y=txtHours.getText();
+    	Integer ore=0;
+    	try {
+    		ore=Integer.parseInt(y);
+    	} catch(NumberFormatException e) {
+    		txtResult.setText("Inserire come ore un numero");
+    		return;
+    	}
+    	
+    	Nerc nerc=cmbNerc.getValue();
+    	if(nerc==null) {
+    		txtResult.setText("Scegliere un nerc");
+    		return;
+    	}
+    	
+    	StringBuilder sb=new StringBuilder();
+    	List<Guasti> l=model.worstCase(nerc, anni, ore);
+    	sb.append("Tot people affected: "+model.totPersone()+"\n");
+    	
+    	sb.append("Tot hours of outage: "+model.totDiss()+"\n");
+    	
+    	
+    //	System.out.println(l);
+    //	System.out.println(anni);
+    //	System.out.println(ore);
+    //	System.out.println(model.worstCase(nerc, 4, 200));
+    	for (Guasti g:l){
+    		sb.append(String.format("%-4d ",g.getInizio().getYear()));
+    		sb.append(String.format("%-18s ",g.getInizio()));
+    		sb.append(String.format("%-18s ",g.getFine()));
+    		sb.append(String.format("%-2d ",g.oreDisservizio()));
+    		sb.append(String.format("%-8d\n",g.getPersoneAffette()));
+    	}
+    	
+    	txtResult.appendText(sb.toString());
+    	
+    	
+    	
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete
@@ -54,5 +103,7 @@ public class FXMLController {
     
     public void setModel(Model model) {
     	this.model = model;
+    	cmbNerc.getItems().addAll(model.getNercList());
+    	txtResult.setStyle("-fx-font-family:monospace");
     }
 }
